@@ -11,6 +11,12 @@ import sys
 import requests
 from pathlib import Path
 
+HARD_CODED_PAGES = [
+    "https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-overview.md",
+    "https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-headless.md",
+    "https://docs.anthropic.com/en/docs/claude-code/sdk/sdk-python.md"
+]
+
 def main():
     # Get target directory from command line or use current directory
     target_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
@@ -45,6 +51,23 @@ def main():
             print(f"  ✓ Saved {page}.md")
         except Exception as e:
             print(f"  ✗ Failed to download {page}: {e}")
+    
+    # Download hard-coded pages
+    print(f"\nDownloading {len(HARD_CODED_PAGES)} hard-coded pages...")
+    for url in HARD_CODED_PAGES:
+        # Extract filename from URL
+        filename = url.split('/')[-1]
+        print(f"Downloading {filename}...")
+        try:
+            page_response = requests.get(url)
+            page_response.raise_for_status()
+            
+            # Save to file (overwrites if exists)
+            file_path = docs_dir / filename
+            file_path.write_text(page_response.text)
+            print(f"  ✓ Saved {filename}")
+        except Exception as e:
+            print(f"  ✗ Failed to download {filename}: {e}")
     
     print(f"\nDone! Documentation saved to {docs_dir}")
 
