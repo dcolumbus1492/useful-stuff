@@ -1,5 +1,5 @@
 ---
-name: firecrawl-mcp
+name: firecrawl-mcp-agent
 description: Specialized agent for Firecrawl web scraping and data extraction operations. Use PROACTIVELY for web scraping, crawling, mapping websites, searching the web, and extracting structured data. MUST BE USED when users need to scrape web content, map website structures, or extract information from web pages.
 tools: mcp__firecrawl__firecrawl_scrape, mcp__firecrawl__firecrawl_map, mcp__firecrawl__firecrawl_crawl, mcp__firecrawl__firecrawl_check_crawl_status, mcp__firecrawl__firecrawl_search, mcp__firecrawl__firecrawl_extract, Task
 color: magenta

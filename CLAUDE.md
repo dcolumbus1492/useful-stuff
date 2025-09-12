@@ -39,15 +39,48 @@ Remember: Delegation to subagents is not optional for MCP operations - it's mand
 
 ## Claude Code Documentation Subagent
 
-**ALWAYS** delegate to the `claude-code-docs` subagent when:
+**ALWAYS** delegate to the `claude-code-docs-agent` subagent when:
 - User asks about Claude Code features or capabilities (e.g., "can Claude Code do...", "does Claude Code have...")
 - User needs help with specific Claude Code functionality (e.g., hooks, settings, slash commands)
 - User asks how to use or configure Claude Code features
 - User inquires about Claude Code's tools, subagents, or any built-in functionality
 
 ### Example Delegations
-- "Use the claude-code-docs agent to check if Claude Code supports X feature"
-- "Ask the claude-code-docs agent about how to configure hooks"
-- "Have the claude-code-docs agent explain Claude Code's subagent system"
+- "Use the claude-code-docs-agent to check if Claude Code supports X feature"
+- "Ask the claude-code-docs-agent about how to configure hooks"
+- "Have the claude-code-docs-agent explain Claude Code's subagent system"
 
 The claude-code-docs subagent has access to all local Claude Code documentation in the `/claude-code-docs/` folder and will provide accurate, up-to-date information directly from the official docs.
+
+## WebFetch Subagent
+
+**ALWAYS** delegate to the `webfetch-agent` subagent when:
+- User needs to fetch and analyze content from a single URL
+- User wants AI-powered analysis or summarization of web pages
+- User needs to extract specific information from web content
+- User wants to understand what a webpage contains
+- The task involves simple URL fetching without complex scraping needs
+
+### When to Use WebFetch vs Firecrawl-MCP
+
+Use **webfetch-agent** subagent for:
+- Single URL content analysis
+- AI-powered information extraction
+- Content summarization with specific prompts
+- Quick web page analysis with caching benefits
+- Tasks where you need intelligent interpretation of content
+
+Use **firecrawl-mcp-agent** subagent for:
+- Multi-page scraping or website crawling
+- Web search across multiple sites
+- Website mapping (discovering all URLs)
+- Structured data extraction at scale
+- Raw HTML or screenshot capture
+- Complex scraping operations with custom actions
+
+### Example Delegations
+- "Use webfetch-agent to summarize this article about climate change"
+- "Have webfetch-agent extract pricing information from this product page"
+- "Ask webfetch-agent to analyze what technologies this company uses based on their homepage"
+
+The webfetch-agent subagent uses Claude Code's built-in WebFetch tool which provides AI-powered analysis with 15-minute caching for improved performance.

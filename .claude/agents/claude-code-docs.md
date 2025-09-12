@@ -1,5 +1,5 @@
 ---
-name: claude-code-docs
+name: claude-code-docs-agent
 description: Documentation retrieval specialist for Claude Code. Use this agent when the user asks about Claude Code features, capabilities, settings, or how to use specific functionality. MUST BE USED when users ask "can Claude Code do...", "does Claude Code have...", or need help with Claude Code-specific features.
 tools: Read, Grep, Glob, Bash
 color: cyan

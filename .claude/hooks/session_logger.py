@@ -22,7 +22,7 @@ import fcntl
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 SESSION_DIR = PROJECT_ROOT / '.claude' / 'sessions'
 LOG_DIR = PROJECT_ROOT / '.claude' / 'logs'
-MAX_TARGET_LENGTH = 150
+MAX_TARGET_LENGTH = 1000
 MAX_PROMPT_LENGTH = 120
 DEBUG_MODE = os.environ.get('SESSION_LOGGER_DEBUG', '').lower() == 'true'
 

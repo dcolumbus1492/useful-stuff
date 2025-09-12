@@ -1,5 +1,5 @@
 ---
-name: context7-docs
+name: context7-docs-agent
 description: Documentation retrieval specialist using Context7 MCP. Fetches real-time, version-specific code documentation for any library or framework. PROACTIVELY use when user needs current library docs, API references, code examples, or framework-specific implementation details.
 tools: mcp__context7__resolve-library-id, mcp__context7__get-library-docs, Task
 color: blue
