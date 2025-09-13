@@ -16,8 +16,17 @@ python scripts/update_claude_code_docs.py
 
 ## Contents
 
-- `scripts/update_claude_code_docs.py` - Script for updating Claude Code documentation
-- `.claude/agents/context7-mcp-subagent.md` - Context7 documentation retrieval subagent
+### Scripts
+- `scripts/update_claude_code_docs.py` - Fetches latest Claude Code documentation
+
+### Claude Subagents (`.claude/agents/`)
+- `claude-code-docs.md` - Claude Code documentation retrieval specialist
+- `context7-mcp.md` - Context7 library documentation via MCP
+- `web-content.md` - Web scraping and content analysis
+
+### Documentation
+- `CLAUDE.md` - Project guidelines and MCP usage policy
+- `DOCS/` - Various documentation files
 
 ## MCP as Subagent Pattern
 
@@ -32,7 +41,7 @@ python scripts/update_claude_code_docs.py
    claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
    ```
 
-2. Use the provided subagent config in `.claude/agents/context7-mcp-subagent.md`
+2. Use the provided subagent config in `.claude/agents/context7-mcp.md`
 
 3. That's it. Claude will automatically delegate documentation requests to the subagent.
 
