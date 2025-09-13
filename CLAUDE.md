@@ -33,7 +33,7 @@ Check `.claude/agents/` for configured MCP subagents. Each should:
 - Contain domain-specific instructions
 
 Currently configured MCP subagents:
-- `firecrawl-mcp` - Handles all Firecrawl MCP operations for web scraping, crawling, searching, and data extraction
+- `web-content` - Comprehensive web content specialist that intelligently handles all web-related tasks, from simple URL analysis to complex scraping, crawling, and searching
 
 Remember: Delegation to subagents is not optional for MCP operations - it's mandatory.
 
@@ -52,35 +52,41 @@ Remember: Delegation to subagents is not optional for MCP operations - it's mand
 
 The claude-code-docs subagent has access to all local Claude Code documentation in the `/claude-code-docs/` folder and will provide accurate, up-to-date information directly from the official docs.
 
-## WebFetch Subagent
+## Web Content Subagent
 
-**ALWAYS** delegate to the `webfetch-agent` subagent when:
-- User needs to fetch and analyze content from a single URL
-- User wants AI-powered analysis or summarization of web pages
-- User needs to extract specific information from web content
-- User wants to understand what a webpage contains
-- The task involves simple URL fetching without complex scraping needs
+**ALWAYS** delegate to the `web-content` subagent when:
+- User needs to fetch, analyze, or extract content from any URL
+- User wants to search the web for information
+- User needs to scrape data from websites
+- User wants to crawl multiple pages or entire websites
+- User needs screenshots or raw HTML from web pages
+- User wants to discover all URLs on a website
+- User needs AI-powered analysis or summarization of web content
+- ANY task involving web content retrieval or analysis
 
-### When to Use WebFetch vs Firecrawl-MCP
+### Intelligent Tool Selection
 
-Use **webfetch-agent** subagent for:
+The web-content subagent automatically selects the most appropriate tool:
+
+**Simple AI Analysis** (via WebFetch):
 - Single URL content analysis
-- AI-powered information extraction
-- Content summarization with specific prompts
-- Quick web page analysis with caching benefits
-- Tasks where you need intelligent interpretation of content
+- AI-powered interpretation or summary
+- Quick analysis with 15-minute caching
+- Natural language information extraction
 
-Use **firecrawl-mcp-agent** subagent for:
-- Multi-page scraping or website crawling
+**Advanced Operations** (via Firecrawl MCP):
+- Multi-page scraping or crawling
 - Web search across multiple sites
-- Website mapping (discovering all URLs)
+- Website mapping and URL discovery
 - Structured data extraction at scale
-- Raw HTML or screenshot capture
-- Complex scraping operations with custom actions
+- Screenshots and raw HTML capture
+- Complex scraping with custom actions
 
 ### Example Delegations
-- "Use webfetch-agent to summarize this article about climate change"
-- "Have webfetch-agent extract pricing information from this product page"
-- "Ask webfetch-agent to analyze what technologies this company uses based on their homepage"
+- "Use web-content agent to summarize this article"
+- "Have web-content agent search for recent AI research papers"
+- "Ask web-content agent to scrape all product prices from this e-commerce site"
+- "Use web-content agent to map the structure of docs.example.com"
+- "Have web-content agent extract contact information from this webpage"
 
-The webfetch-agent subagent uses Claude Code's built-in WebFetch tool which provides AI-powered analysis with 15-minute caching for improved performance.
+The web-content subagent is your one-stop solution for ALL web-related tasks, intelligently choosing between simple AI analysis and advanced scraping capabilities based on the specific needs of each request.

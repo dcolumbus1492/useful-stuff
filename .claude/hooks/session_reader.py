@@ -31,6 +31,11 @@ class SessionReader:
         'SUBAGENT_STOP': '[SUBAGENT_DONE]',
         'USER': 'USER:',
         'Notification': '[NOTIFY]',
+        'TODO_LIST': '[TODO_LIST]',
+        'TODO_ITEM': '  ☐',
+        'TODO_STATUS_CHANGE': '  ✓',
+        'TODO_ADDED': '  +',
+        'TODO_REMOVED': '  -',
     }
     
     # Tool groupings for summarization
@@ -89,8 +94,15 @@ class SessionReader:
             if event_type in self.EVENT_DISPLAY_MAP:
                 if event_type == 'USER':
                     lines.append(f"{self.EVENT_DISPLAY_MAP[event_type]} {target}")
+                elif event_type in ['TODO_ITEM', 'TODO_STATUS_CHANGE', 'TODO_ADDED', 'TODO_REMOVED']:
+                    # Todo-related events with special formatting
+                    lines.append(f"{self.EVENT_DISPLAY_MAP[event_type]} {target}")
                 else:
-                    lines.append(self.EVENT_DISPLAY_MAP[event_type])
+                    # Other special events
+                    if target:
+                        lines.append(f"{self.EVENT_DISPLAY_MAP[event_type]} {target}")
+                    else:
+                        lines.append(self.EVENT_DISPLAY_MAP[event_type])
             else:
                 # Tool usage - ultra compressed
                 if status == 'error':

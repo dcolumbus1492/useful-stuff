@@ -22,8 +22,8 @@ import fcntl
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 SESSION_DIR = PROJECT_ROOT / '.claude' / 'sessions'
 LOG_DIR = PROJECT_ROOT / '.claude' / 'logs'
-MAX_TARGET_LENGTH = 1000
-MAX_PROMPT_LENGTH = 120
+MAX_TARGET_LENGTH = 5000
+MAX_PROMPT_LENGTH = 5000
 DEBUG_MODE = os.environ.get('SESSION_LOGGER_DEBUG', '').lower() == 'true'
 
 # Ensure directories exist
@@ -32,7 +32,7 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 class SessionLogger:
     """Main session logger class with robust error handling and efficient processing."""
-    
+
     # Tool parameter mappings
     TOOL_PARAM_MAP = {
         # File operations
@@ -41,34 +41,37 @@ class SessionLogger:
         'Edit': 'file_path',
         'MultiEdit': 'file_path',
         'NotebookEdit': 'notebook_path',
-        
+
         # Command execution
         'Bash': 'command',
         'BashOutput': 'bash_id',
         'KillBash': 'shell_id',
-        
+
         # Search operations
         'Grep': lambda inp: f"{inp.get('pattern', '')} in {inp.get('path', '.')}",
         'Glob': lambda inp: f"{inp.get('pattern', '')} in {inp.get('path', '.')}",
-        
+
         # Agent operations
         'Task': lambda inp: f"{inp.get('subagent_type', 'agent')}: {inp.get('description', '')}",
-        
+
         # Web operations
         'WebFetch': 'url',
-        
-        # Todo management
-        'TodoWrite': lambda inp: f"{len(inp.get('todos', []))} todos",
-        
+
+        # Todo management - will be specially handled
+        'TodoWrite': 'special_handler',
+
         # Special operations
         'ExitPlanMode': lambda inp: inp.get('plan', '')[:50] + '...' if inp.get('plan', '') else '',
     }
-    
+
     def __init__(self):
         self.session_files: Dict[str, Path] = {}  # Cache session_id -> file mapping
         self.error_log = LOG_DIR / 'session_logger_errors.log'
         self.index_file = SESSION_DIR / '.session_index.json'
+        self.todo_state_file = SESSION_DIR / '.todo_states.json'
+        self.todo_states: Dict[str, list] = {}  # Cache session_id -> previous todo state
         self._load_session_index()
+        self._load_todo_states()
         
     def log_debug(self, message: str) -> None:
         """Log debug messages if debug mode is enabled."""
@@ -137,6 +140,30 @@ class SessionLogger:
             
         except Exception as e:
             self.log_error(e, "Failed to save session index")
+
+    def _load_todo_states(self) -> None:
+        """Load the todo states from persistent storage."""
+        if self.todo_state_file.exists():
+            try:
+                with open(self.todo_state_file, 'r') as f:
+                    self.todo_states = json.load(f)
+            except Exception as e:
+                self.log_error(e, "Failed to load todo states")
+                self.todo_states = {}
+        else:
+            self.todo_states = {}
+
+    def _save_todo_states(self) -> None:
+        """Save the todo states to persistent storage."""
+        try:
+            # Write with atomic operation
+            temp_file = self.todo_state_file.with_suffix('.tmp')
+            with open(temp_file, 'w') as f:
+                json.dump(self.todo_states, f, indent=2)
+            # Atomic rename
+            temp_file.rename(self.todo_state_file)
+        except Exception as e:
+            self.log_error(e, "Failed to save todo states")
     
     def get_session_file(self, session_id: str) -> Path:
         """Get or create session file with stable naming."""
@@ -166,27 +193,31 @@ class SessionLogger:
         """
         if not tool_input:
             return ""
-        
+
         try:
+            # Special handling for TodoWrite
+            if tool_name == "TodoWrite":
+                return self._handle_todo_write(tool_input)
+
             # Handle MCP tools
             if tool_name.startswith("mcp__"):
                 return self._extract_mcp_target(tool_name, tool_input)
-            
+
             # Get mapping for this tool
             mapping = self.TOOL_PARAM_MAP.get(tool_name)
-            
+
             if mapping is None:
                 # Unknown tool - try to extract first meaningful string
                 return self._extract_default_target(tool_input)
-            
+
             if callable(mapping):
                 # Custom extraction function
                 result = mapping(tool_input)
                 return self._truncate_target(str(result))
-            
+
             # Simple parameter mapping
             value = tool_input.get(mapping, "")
-            
+
             # Special handling for certain tools
             if tool_name == "Bash" and value:
                 # Clean up bash commands
@@ -194,9 +225,9 @@ class SessionLogger:
             elif tool_name in ["Read", "Write", "Edit", "MultiEdit"] and value:
                 # Simplify file paths
                 value = self._simplify_path(value)
-            
+
             return self._truncate_target(str(value))
-            
+
         except Exception as e:
             self.log_error(e, f"Error extracting target for {tool_name}")
             return "error"
@@ -290,6 +321,14 @@ class SessionLogger:
         if len(target) <= MAX_TARGET_LENGTH:
             return target
         return target[:MAX_TARGET_LENGTH-3] + "..."
+
+    def _handle_todo_write(self, tool_input: Dict[str, Any]) -> str:
+        """
+        Handle TodoWrite tool with enhanced logging.
+        Returns a summary but also logs detailed todo events.
+        """
+        todos = tool_input.get('todos', [])
+        return f"{len(todos)} todos"  # This is returned for the main TodoWrite event
     
     def log_event(self, session_id: str, event_type: str, 
                   target: str = "", status: str = "ok") -> None:
@@ -358,12 +397,67 @@ def main():
             if len(prompt) > MAX_PROMPT_LENGTH:
                 prompt_clean += "..."
             logger.log_event(session_id, "USER", prompt_clean)
-            
+
         elif action == "tool_use":
             tool_name = data.get("tool_name", "unknown")
             tool_input = data.get("tool_input", {})
-            target = logger.extract_target(tool_name, tool_input)
-            logger.log_event(session_id, tool_name, target)
+
+            # Special handling for TodoWrite to log detailed todo information
+            if tool_name == "TodoWrite":
+                todos = tool_input.get("todos", [])
+
+                # Log the main TodoWrite event
+                logger.log_event(session_id, "TodoWrite", f"{len(todos)} todos")
+
+                # If this is the first time seeing todos
+                if session_id not in logger.todo_states:
+                    # Log the initial todo list
+                    logger.log_event(session_id, "TODO_LIST", "Initial todo list created")
+                    for i, todo in enumerate(todos):
+                        content = todo.get('content', '')
+                        status = todo.get('status', 'pending')
+                        logger.log_event(session_id, "TODO_ITEM", f"[{status}] {content}")
+                else:
+                    # Compare with previous state to find changes
+                    prev_todos = logger.todo_states[session_id]
+
+                    # Create maps for easy comparison
+                    prev_map = {t.get('content'): t for t in prev_todos}
+                    curr_map = {t.get('content'): t for t in todos}
+
+                    # Find status changes
+                    for content, todo in curr_map.items():
+                        if content in prev_map:
+                            prev_status = prev_map[content].get('status')
+                            curr_status = todo.get('status')
+                            if prev_status != curr_status:
+                                logger.log_event(
+                                    session_id,
+                                    "TODO_STATUS_CHANGE",
+                                    f"[{prev_status}→{curr_status}] {content}"
+                                )
+
+                    # Find new todos
+                    for content in curr_map:
+                        if content not in prev_map:
+                            todo = curr_map[content]
+                            status = todo.get('status', 'pending')
+                            logger.log_event(session_id, "TODO_ADDED", f"[{status}] {content}")
+
+                    # Find removed todos
+                    for content in prev_map:
+                        if content not in curr_map:
+                            todo = prev_map[content]
+                            status = todo.get('status', 'pending')
+                            logger.log_event(session_id, "TODO_REMOVED", f"[{status}] {content}")
+
+                # Update state
+                logger.todo_states[session_id] = todos.copy()
+                logger._save_todo_states()  # Persist the state
+            else:
+                # Normal tool handling
+                target = logger.extract_target(tool_name, tool_input)
+                logger.log_event(session_id, tool_name, target)
             
         elif action == "tool_result":
             # Log only errors to avoid duplication
