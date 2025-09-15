@@ -94,7 +94,8 @@
   },
   "permissions": {
     "allow": [
-      "Bash(uv run scripts/update_claude_code_docs.py)"
+      "Bash(uv run scripts/update_claude_code_docs.py)",
+      "Bash(uv run scripts/update_pydantic_ai_docs.py)"
     ]
   }
 }

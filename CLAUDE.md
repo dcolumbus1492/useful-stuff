@@ -34,6 +34,7 @@ Check `.claude/agents/` for configured MCP subagents. Each should:
 
 Currently configured MCP subagents:
 - `web-content` - Comprehensive web content specialist that intelligently handles all web-related tasks, from simple URL analysis to complex scraping, crawling, and searching
+- `ollama-inference-agent` - Local LLM inference via Ollama models with structured output support using Pydantic AI
 
 Remember: Delegation to subagents is not optional for MCP operations - it's mandatory.
 
@@ -51,6 +52,29 @@ Remember: Delegation to subagents is not optional for MCP operations - it's mand
 - "Have the claude-code-docs-agent explain Claude Code's subagent system"
 
 The claude-code-docs subagent has access to all local Claude Code documentation in the `/claude-code-docs/` folder and will provide accurate, up-to-date information directly from the official docs.
+
+## Pydantic AI Documentation Subagent
+
+**ALWAYS** delegate to the `pydantic-ai-docs-agent` subagent when:
+- User asks about Pydantic AI features, concepts, or capabilities
+- User needs help implementing AI agents with Pydantic AI
+- User asks about Pydantic AI models, tools, or dependencies
+- User needs examples of Pydantic AI usage patterns
+- User inquires about specific Pydantic AI API functions or classes
+- User wants to understand Multi-Agent patterns, MCP integration, or advanced features
+
+### Example Delegations
+- "Use the pydantic-ai-docs-agent to explain how to create a Pydantic AI agent"
+- "Ask the pydantic-ai-docs-agent about available model providers"
+- "Have the pydantic-ai-docs-agent show examples of function tools"
+- "Use the pydantic-ai-docs-agent to explain the MCP (Model Context Protocol) integration"
+
+The pydantic-ai-docs subagent has access to all Pydantic AI documentation in the `/pydantic-ai-docs/` folder, including:
+- Complete API reference for all modules
+- Conceptual guides (agents, tools, dependencies, messages)
+- Model provider documentation (OpenAI, Anthropic, Google, etc.)
+- Practical examples and patterns
+- Advanced features like graphs, MCP, and evals
 
 ## Web Content Subagent
 
@@ -90,3 +114,24 @@ The web-content subagent automatically selects the most appropriate tool:
 - "Have web-content agent extract contact information from this webpage"
 
 The web-content subagent is your one-stop solution for ALL web-related tasks, intelligently choosing between simple AI analysis and advanced scraping capabilities based on the specific needs of each request.
+
+## Ollama Inference Subagent
+
+**ALWAYS** delegate to the `ollama-inference-agent` subagent when:
+- User needs to run LLM inference with custom system prompts
+- User wants structured output from LLM calls (JSON schemas)
+- User needs local, private LLM processing without external API calls
+- User wants to define LLMs as "functions" with specific input/output formats
+- User needs to extract structured data from unstructured text using local models
+
+### Example Delegations
+- "Use ollama-inference-agent agent to extract product details from this description"
+- "Have ollama-inference-agent agent classify this text into categories using llama3.2"
+- "Ask ollama-inference-agent agent to transform this data using structured output"
+- "Use ollama-inference-agent agent to run inference with a custom system prompt"
+
+The ollama-inference-agent subagent provides access to local Ollama models through Pydantic AI's direct LLM calls, supporting:
+- Any installed Ollama model (defaults to llama3.2)
+- Structured output via JSON schemas
+- Custom system prompts for task-specific behavior
+- Direct model inference without the full agent pattern
