@@ -31,6 +31,11 @@
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_logger.py tool_use",
             "timeout": 2
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/cost_hook.py tool_use",
+            "timeout": 1
           }
         ]
       }
@@ -43,6 +48,11 @@
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_logger.py tool_result",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/cost_hook.py tool_result",
+            "timeout": 1
           }
         ]
       }
@@ -54,6 +64,11 @@
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/session_logger.py subagent_stop",
             "timeout": 2
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/cost_hook.py subagent_stop",
+            "timeout": 1
           }
         ]
       }
@@ -91,6 +106,11 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statusline_cost_advanced.py",
+    "padding": 0
   },
   "permissions": {
     "allow": [
